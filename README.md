@@ -1,80 +1,55 @@
-# Load-Balancer
+# Load Balancer Implementation
 
-Harea Teodor-Adrian
-313CA
+---
 
-Structuri de date
-Tema2
+## General Description
 
-  Tema isi propune sa utilizeze notiunile de hashtable
-pentru a realiza o implementare a unui load balancer, asa
-cum a fost descris in cadrul enuntului. Am utilizat functiile
-folosite la laborator pentru a gestiona hashtable-urile din spatele
-serverelor.
+This project implements a load balancer using hash tables, leveraging concepts learned in the laboratory. The load balancer distributes key-value pairs across multiple server memories, each represented as a hash table.
 
-  Se pot identifica urmatoarele fisiere:
+---
 
--"main.c": reprezinta baza programului, modul in care putem interactiona
-cu acesta. Se identifica un loop ce citeste comenzile prezente in fisierul
-primit ca parametru. De asemenea, se remarca functiile "get_key_value" si
-"get_key" ce parseaza liniile citite din fisier si scoate cheile si valorile
-ce vor fi introduse in load balancer, care le va distribui in memoriile
-serverelor.
+## File Overview
 
--"server.c": aici se regasesc functiile de baza pentru listele inlantuite,
-pentru hashtable-uri si pentru lucrul cu structura "server_memory";
-	Functii:
--"init_server_memory": aloca memoria necesara unui server si returneaza
-acest server;
--"server_store": functia de hashtable "ht_put";
--"server_retrieve": functia de hashtable "ht_get";
--"server_remove_entry": functia de hashtable "ht_remove_entry";
--"free_server_memory": functia de hashtable "ht_free";
--"return_server_key_value": functia care returneaza toate perechile
-de tip "key si value" dintr-un server.
+- **main.c**  
+  The program entry point, handling user interaction via commands read from an input file. It contains parsing functions `get_key_value` and `get_key` to extract keys and values from input lines, which are then managed by the load balancer for distribution across servers.
 
--"load_balancer.c": contine functiile ce gestioneaza load balancer-ul;
-	Functii:
--"hash_function_servers": returneaza hash-ul mastii sau id-ului unui
-server;
--"hash_function_key"; returneaza hash-ul unei chei;
--"init_load_balancer": aloca memoria si initializeaza o structura de
-tip "load_balancer";
--"loader_add_server": adauga un nou server in load balancer. Se realoca
-memoria pentru array-ul de hashring si array-ul de servere. Se calculeaza
-ethichetele serverului nou adaugat si se insereaza in hashring, tinand
-cont ca acest vector trebuie sa ramana ordonat crescator. Dupa acestea,
-se realizeaza procesul de redistribuire a datelor prezente in memoriile
-serverelor din load balancer. Se itereaza prin vectorul de hash-uri si,
-pentru fiecare dintre cele 3 noi hash-uri adaugate in hashring, se verifica
-care este hash-ul imediat urmator in sens crescator. Se cauta id-ul serverului
-reprezentat de hash-ul gasit. Se scot, pe rand, datele din serverul cu id-ul
-gasit si se adauga din nou in load balancer, prin intermediul functiei de
-"loader store";
--"loader_remove_server": sterge un server din load balancer. Se realoca
-memoria pentru array-urile de servere si de hash-uri si se sterge serverul
-respectiv din array-ul de servere, precum si hash-urile ce ii corespund
-acestuia din array-ul de hashring. Se scot toate perechile de tip
-key si value din serverul pe care vrem sa il stergem si se insereaza din
-nou in load balancer, acest lucru fiind realizat dupa ce am sters
-datele din load balancer legate de acest server. Se elibereaza memoria
-serverului de sters; 
--"loader_store": adauga in serverele din load balancer o pereche de
-tip key si value. Se calculeaza hash-ul key-ului si se gaseste hash-ul
-imediat urmator in sens crescator, din hashring. Se identifica id-ul
-serverului caruia ii corespunde hash-ul gasit. In acest server se
-vor introduce datele;
--"loader_retrieve": cauta valoarea "value" asociata cheii "key" primita.
-Se calculeaza hash-ul cheii si se cauta hash-ul imediat urmator in sens
-crescator din hashring. Se identifica id-ul serverului caruia ii corespunde
-hash-ul. In aceste server se cauta perechile de tip key si value si se
-returneaza "value"-ul asociat cheii "key";
--"free_load_balancer": elibereaza memoria load balancer-ului;
+- **server.c**  
+  Implements basic functions for linked lists, hash tables, and the `server_memory` structure:  
+  - `init_server_memory`: allocates and initializes a new server.  
+  - `server_store`: inserts a key-value pair into the server hash table.  
+  - `server_retrieve`: retrieves a value by key.  
+  - `server_remove_entry`: removes a key-value pair.  
+  - `free_server_memory`: frees server resources.  
+  - `return_server_key_value`: returns all key-value pairs stored in a server.
 
--"load_balancer.h": contine structura de load_balancer, in care se gasesc
-hashring-ul, size-ul hashring-ului(numarul de hashuri prezente in acesta),
-array-ul de pointeri catre servere(servers) si numarul de servere(size);
+- **load_balancer.c**  
+  Contains functions managing the load balancer:  
+  - `hash_function_servers`: computes hash for server mask or ID.  
+  - `hash_function_key`: computes hash for a key.  
+  - `init_load_balancer`: initializes the load balancer structure.  
+  - `loader_add_server`: adds a server, reallocating memory and maintaining a sorted hash ring; redistributes data among servers.  
+  - `loader_remove_server`: removes a server, redistributes its data, and frees memory.  
+  - `loader_store`: adds a key-value pair to the appropriate server via consistent hashing.  
+  - `loader_retrieve`: retrieves a value by key from the correct server.  
+  - `free_load_balancer`: frees load balancer resources.
 
--"server.h": contine structura de server_memory, care este o structura
-de tip hashtable, ce are in aceasta array-ul de liste simplu inlantuite
-(buckets), id-ul serverului(server_id) si numarul de bucket-uri(size);
+- **load_balancer.h**  
+  Defines the `load_balancer` structure containing:  
+  - `hashring`: array of server hashes (sorted).  
+  - `size`: number of hashes in the hashring.  
+  - `servers`: array of pointers to servers.  
+  - `size`: number of servers.
+
+- **server.h**  
+  Defines the `server_memory` structure representing a hash table with:  
+  - `buckets`: array of linked lists.  
+  - `server_id`: unique identifier for the server.  
+  - `size`: number of buckets.
+
+---
+
+## Summary
+
+This project demonstrates a consistent hashing load balancer using hash tables to distribute and manage key-value pairs across multiple servers dynamically. It supports adding and removing servers with data redistribution to maintain balanced load and high availability.
+
+---
